@@ -74,16 +74,36 @@ func PrintMap(w io.Writer, i Indenter, byMap bool, v map[string]interface{}) {
 		fmt.Fprint(w, "\n")
 	}
 	b := false
+	hasScript := false
 	for key, val := range v {
 		if val == nil {
+			continue
+		}
+		if key == "script" {
+			hasScript = true
 			continue
 		}
 		if b {
 			fmt.Fprint(w, "\n")
 		}
-		fmt.Fprintf(w, `%s"%s": `, i.S, key)
+		printHead(w, i, key)
 		PrintValue(w, i.Increment(), true, val)
 		b = true
+	}
+	if hasScript {
+		if b {
+			fmt.Fprint(w, "\n")
+		}
+		printHead(w, i, "script")
+		PrintValue(w, i.Increment(), true, v["script"])
+	}
+}
+
+func printHead(w io.Writer, i Indenter, key string) {
+	if strings.ContainsRune(key, ' ') {
+		fmt.Fprintf(w, `%s"%s": `, i.S, key)
+	} else {
+		fmt.Fprintf(w, `%s%s: `, i.S, key)
 	}
 }
 
