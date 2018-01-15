@@ -33,23 +33,26 @@ func main() {
 	input = bytes.TrimPrefix(input, []byte("\xef\xbb\xbf"))
 
 	var v interface{}
-	err = json.Unmarshal(input, &v)
+	err = yaml.Unmarshal(input, &v)
 	if err != nil {
 		log.Fatal("Input parse error:", err)
 	}
 
-	bs, err := yaml.Marshal(v)
+	bs, err := json.MarshalIndent(v, "", "    ")
 	if err != nil {
 		log.Fatal("Output encoding error:", err)
 	}
 
-	outName := strings.TrimSuffix(inputName, ".json")
-	outName = outName + ".yaml"
+	outName := strings.TrimSuffix(inputName, ".yml")
+	outName = strings.TrimSuffix(outName, ".yaml")
+	outName = outName + ".json"
 	out, err := os.Create(outName)
 	if err != nil {
 		log.Fatal("Output file error:", err)
 	}
 	defer out.Close()
+
+	bs = bytes.Replace(bs, []byte(`\n`), []byte(`\r\n`), -1)
 
 	out.Write(bs)
 }
